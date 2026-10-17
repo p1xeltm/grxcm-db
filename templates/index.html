@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>grxcm-db</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+    <header class="banner-balken">
+        <div class="banner-inhalt">
+            <img src="{{ url_for('static', filename='favicon.svg') }}" alt="Logo" class="banner-icon">
+            <span class="banner-titel">grxcm-db</span>
+        </div>
+
+        <a href="https://github.com/p1xeltm/grxcm-db" target="_blank" rel="noopener noreferrer" class="banner-version">v1.00.0</a>
+    </header>
+
+    <main class="hauptinhalt">
+        <div class="header-bereich">
+            <input type="text" id="suche" placeholder="> ..." class="suche-box">
+        </div>
+
+        <div class="spaltenlayout">
+            
+            <div class="container-tabelle">
+                <div class="tabelle-wrapper">
+                    <table class="tabelle">
+                        <thead>
+                            <tr>
+                                <th class="spalte-align-left spalte-datum"><span class="datum-text">tag</span></th>
+                                <th class="spalte-align-left spalte-rad">○</th>
+                                <th class="spalte-align-left spalte-titel">txt</th>
+                                <th class="spalte-align-right spalte-distanz">km</th>
+                                <th class="spalte-align-right spalte-anstieg">hm</th>
+                                <th class="spalte-align-right spalte-zeit">h:mm:ss</th>
+                                <th class="spalte-align-right spalte-avg">avg</th>
+                                <th class="spalte-align-right spalte-fav">★</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daten">
+                            <tr><td colspan="8">Abruf Daten ...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="container-rechts">
+                <div id="osmkarte" class="container-osmkarte"></div>
+                <div id="hoehenprofil" class="container-hoehenprofil"><span>Höhenprofil</span></div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

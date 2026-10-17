@@ -1,0 +1,10 @@
+[Unit]
+Description=grxcm-db Flask Server
+
+[Service]
+WorkingDirectory=/home/tm/Laufwerk-T/git_p1xeltm/grxcm-db
+ExecStart=/usr/bin/python3 /home/tm/Laufwerk-T/git_p1xeltm/grxcm-db/server.py
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

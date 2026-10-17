@@ -1,0 +1,321 @@
+/*
+  -----------------------------------------------------------------------
+    FARBPALETTE
+  -----------------------------------------------------------------------
+*/
+
+:root {
+    --col-main1:    hsl(207, 100%, 17%);
+    --col-main2:    hsl(207, 100%, 30%);
+
+    --col-weiss:    hsl(0, 0%, 100%);
+    --col-grau95:   hsl(0, 0%, 95%);
+    --col-grau85:   hsl(0, 0%, 85%);
+    --col-grau75:   hsl(0, 0%, 75%);
+    --col-grau60:   hsl(0, 0%, 60%);
+    --col-schwarz:  hsl(0, 0%, 10%);
+
+    --col-exceed:   hsl(25, 100%, 50%);
+    --col-terra:    hsl(190, 50%, 60%);
+    --col-c62o:     hsl(0, 0%, 40%);
+    --col-slx99:    hsl(190, 80%, 30%);
+}
+
+    /* Rad-Klassen u Farben */
+    .rad-exceed { color: var(--col-exceed); }
+    .rad-terra  { color: var(--col-terra);  }
+    .rad-c62o   { color: var(--col-c62o);   }
+    .rad-slx99  { color: var(--col-slx99);  }
+
+
+
+/*
+  -----------------------------------------------------------------------
+    GRUNDGERÜST & LAYOUT
+  -----------------------------------------------------------------------
+*/
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body {
+    font-family: sans-serif;
+    background-color: var(--col-grau95);
+    display: flex;
+    flex-direction: column;
+}
+
+.hauptinhalt {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.spaltenlayout {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    flex: 1;
+    align-items: stretch;
+    overflow: hidden;
+}
+
+.container-tabelle {
+    width: 55%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+
+/*
+  -----------------------------------------------------------------------
+    RECHTER BEREICH (OSM-Karte & Höhenprofil)
+  -----------------------------------------------------------------------
+*/
+
+.container-rechts {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    gap: 10px;
+}
+
+.container-osmkarte {
+    width: 100%;
+    height: 60%;
+    background-color: var(--col-grau95);
+    box-sizing: border-box;
+    display: block;
+    overflow: hidden;
+}
+
+.container-hoehenprofil {
+    width: 100%;
+    flex: 1;
+    background-color: var(--col-grau85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+
+
+/*
+  -----------------------------------------------------------------------
+    BANNER
+  -----------------------------------------------------------------------
+*/
+
+.banner-balken {
+    background-color: var(--col-main1);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.banner-inhalt {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.banner-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.banner-titel {
+    color: var(--col-weiss);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.banner-version {
+    color: var(--col-grau85);
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    display: inline-block;
+    transform: scale(0.75);
+    transform-origin: right center;
+    text-decoration: none;
+}
+
+
+
+/*
+  -----------------------------------------------------------------------
+    HEADER-BEREICH (Suche, ...)
+  -----------------------------------------------------------------------
+*/
+
+.header-bereich {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    width: 55%;
+    height: 26px;
+    box-sizing: border-box;
+}
+
+.suche-box {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--col-weiss);
+    padding: 0 10px;
+    font-size: 0.85rem;
+    border: 0px solid var(--col-grau85);
+    outline: none;
+    width: 200px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.suche-box:focus {
+    border-color: var(--col-main2);
+    box-shadow: 0 0 0 1px var(--col-main2);
+}
+
+
+/*
+  -----------------------------------------------------------------------
+    TABELLE
+  -----------------------------------------------------------------------
+*/
+
+.tabelle-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--col-weiss);
+    border: 15px solid var(--col-weiss);
+    box-sizing: border-box;
+}
+
+.tabelle {
+    width: 100%;
+    font-family: inherit;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    background-color: var(--col-weiss);
+    box-sizing: border-box;
+}
+
+.tabelle th, .tabelle td {
+    font-family: inherit;
+    border-bottom: 1px solid var(--col-grau85);
+    padding: 6px 10px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tabelle th {
+    color: var(--col-main2);
+    border-bottom: 2px solid var(--col-main2);
+    position: sticky;
+    top: 0;
+    background-color: var(--col-weiss);
+    z-index: 10;
+}
+
+.tabelle tbody tr:hover {
+    background-color: var(--col-grau95);
+}
+
+.spalte-align-left   { text-align: left; }
+.spalte-align-center { text-align: center; }
+.spalte-align-right  { text-align: right; }
+
+.spalte-datum     { width: 7%; }
+.spalte-rad       { width: 3%;  }
+.spalte-distanz   { width: 9%; }
+.spalte-anstieg   { width: 7%; }
+.spalte-zeit      { width: 11%; }
+.spalte-avg       { width: 7%;  }
+.spalte-fav       { width: 2.7%;  }
+.spalte-titel     { width: auto; }
+
+.datum-text {
+    display: inline-block;
+    transform: scale(0.85);
+    transform-origin: left center;
+    color: var(--col-grau60) !important;
+    font-weight: normal;
+}
+
+.tabelle tbody tr.aktive-zeile {
+    background-color: var(--col-grau85) !important;
+}
+.tabelle tbody tr {
+    cursor: pointer;
+}
+
+
+
+/*
+  -----------------------------------------------------------------------
+    EDIT_FAV
+  -----------------------------------------------------------------------
+*/
+
+.fav-zelle {
+    cursor: pointer;
+    user-select: none;
+    color: var(--col-main2);
+}
+.fav-zelle:not(.ist-favorit):hover::before {
+    content: '★';
+    opacity: 0.4;
+}
+
+
+/*
+  -----------------------------------------------------------------------
+    EDIT_RAD und EDIT_TITEL
+  -----------------------------------------------------------------------
+*/
+
+.edit-zelle {
+    position: relative;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.icon-edit {
+    display: inline-block;
+    margin-left: 6px;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--col-grau75);
+    user-select: none;
+}
+
+.edit-zelle:hover .icon-edit {
+    opacity: 1;
+}
+
+.edit-zelle:focus .icon-edit {
+    display: none;
+}
+
+.edit-zelle:focus {
+    cursor: text;
+    outline: 1px solid var(--col-main2);
+}
