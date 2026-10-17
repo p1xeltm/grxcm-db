@@ -197,15 +197,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event-Listener für Suchfeld
     document.getElementById('suche').addEventListener('input', function(e) {
         const begriff = e.target.value.toLowerCase().trim();
-        const gefiltert = alleAktivitaeten.filter(zeile => {
-            const datum = formatDatum(zeile.datum).toLowerCase();
+        
+        const gefiltert = alleAktivitaeten.find ? alleAktivitaeten.filter(zeile => {
+            const anzeigeDatum = formatDatum(zeile.datum).toLowerCase();
+            const rohDatum = zeile.datum || '';
+            
+            let deDatum = '';
+            let monatJahr = '';
+            if (rohDatum.includes('-')) {
+                const [jahr, monat, tag] = rohDatum.split('-');
+                deDatum = `${tag}.${monat}.${jahr}`;
+                monatJahr = `${monat}.${jahr}`;
+            }
+
             const rad = (zeile.rad || '').toLowerCase();
             const titel = (zeile.titel || '').toLowerCase();
 
-            return datum.includes(begriff) || 
+            return anzeigeDatum.includes(begriff) || 
+                   rohDatum.includes(begriff) || 
+                   deDatum.includes(begriff) || 
+                   monatJahr.includes(begriff) || 
                    rad.includes(begriff) || 
                    titel.includes(begriff);
-        });
+        }) : [];
 
         rendereTabelle(gefiltert);
     });
