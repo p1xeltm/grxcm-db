@@ -224,6 +224,33 @@ document.addEventListener('DOMContentLoaded', () => {
         rendereTabelle(gefiltert);
     });
 
+    // Event-Listener für fitimport.py-Button
+    const importBtn = document.getElementById('button-fitimportpy');
+    if (importBtn) {
+        importBtn.addEventListener('click', async () => {
+            if (importBtn.classList.contains('laden')) return;
+
+            importBtn.classList.add('laden');
+
+            try {
+                const antwort = await fetch('/api/fitimportpy', { method: 'POST' });
+                const ergebnis = await antwort.json();
+
+                if (ergebnis.success) {
+                    const res = await fetch('/api/activities');
+                    alleAktivitaeten = await res.json();
+                    rendereTabelle(alleAktivitaeten);
+                } else {
+                    console.error('Import-Fehler:', ergebnis.error);
+                }
+            } catch (err) {
+                console.error('Verbindungsfehler beim Import:', err);
+            } finally {
+                importBtn.classList.remove('laden');
+            }
+        });
+    }
+
     // Zentrale Tastatur-Event-Steuerung
     document.addEventListener('keydown', (e) => {
         const el = e.target;

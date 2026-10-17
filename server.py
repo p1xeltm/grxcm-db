@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 import sqlite3, os
+import subprocess
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATENBANK = "/home/tm/Laufwerk-T/GarminEdge130Plus-fit/fitdb.db"
@@ -30,6 +31,28 @@ def update_activity(activity_id):
         conn.commit()
 
     return jsonify({"success": True, "id": activity_id, "spalte": spalte, "wert": wert})
+
+@app.route("/api/fitimportpy", methods=["POST"])
+def run_fitimportpy():
+    try:
+        script_path = os.path.join(BASE_DIR, "fitimport.py")
+        result = subprocess.run(
+            ["python3", script_path], 
+            capture_output=True, 
+            text=True, 
+            check=True
+        )
+        return jsonify({
+            "success": True, 
+            "message": "Import erfolgreich ausgeführt.",
+            "output": result.stdout
+        })
+    except subprocess.CalledProcessError as e:
+        return jsonify({
+            "success": False, 
+            "message": "Fehler beim Importieren.",
+            "error": e.stderr
+        }), 500
 
 if __name__ == "__main__":
     app.run(host="localhost", port=5000, debug=True)
