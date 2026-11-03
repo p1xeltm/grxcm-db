@@ -82,7 +82,7 @@ bereits_importiert = {row[0] for row in cursor.fetchall()}
 
 # Filtern neuer .fit-Dateien
 neue_dateien = [
-    f for f in sorted(Path(FIT_VERZEICHNIS).glob("*.fit")) 
+    f for f in sorted(Path(FIT_VERZEICHNIS).rglob("*.fit")) 
     if f.name not in bereits_importiert
 ]
 
