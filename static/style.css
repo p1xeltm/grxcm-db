@@ -118,6 +118,7 @@ body {
     background-color: var(--col-akzent1);
     padding: 12px 20px;
     display: flex;
+    height: 30px;
     justify-content: space-between;
     align-items: center;
 }
@@ -129,8 +130,9 @@ body {
 }
 
 .banner-icon {
-    width: 24px;
-    height: 24px;
+    width: 41px;
+    height: 41px;
+    object-fit: contain;
 }
 
 .banner-titel {
