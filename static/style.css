@@ -6,23 +6,17 @@
 
 :root {
     --col-akzent1:  hsl(180, 90%, 20%);
+    --col-akzent2:  hsl(160, 100%, 47%);
     --col-backgrnd: hsl(0, 0%, 100%);
     --col-tabelle:  hsl(180, 10%, 95%);
     --col-text1:    hsl(0, 0%, 5%);
     --col-text2:    hsl(0, 0%, 95%);
 
-    --col-exceed:   hsl(25, 100%, 50%);
-    --col-terra:    hsl(190, 64%, 67%);
+    --col-exceed:   var(--col-akzent2);
+    --col-terra:    hsl(190, 71%, 74%);
     --col-c62o:     hsl(0, 0%, 40%);
     --col-slx99:    hsl(190, 80%, 30%);
 }
-
-    /* Rad-Klassen u Farben */
-    .tabelle td.rad-exceed { color: var(--col-exceed); }
-    .tabelle td.rad-terra  { color: var(--col-terra);  }
-    .tabelle td.rad-c62o   { color: var(--col-c62o);   }
-    .tabelle td.rad-slx99  { color: var(--col-slx99);  }
-
 
 
 /*
@@ -346,6 +340,13 @@ body {
     cursor: text;
     outline: 1px solid var(--col-akzent1);
 }
+
+
+/* Zuordnung Farben zu Rad-Klassen */
+.tabelle td.rad-exceed { color: var(--col-exceed); }
+.tabelle td.rad-terra  { color: var(--col-terra);  }
+.tabelle td.rad-c62o   { color: var(--col-c62o);   }
+.tabelle td.rad-slx99  { color: var(--col-slx99);  }
 
 
 /*
