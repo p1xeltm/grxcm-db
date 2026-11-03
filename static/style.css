@@ -260,7 +260,7 @@ body {
 .tabelle td {
     font-family: inherit;
     color: var(--col-text1);
-    border-bottom: 4px solid var(--col-backgrnd);
+    border-bottom: 7px solid var(--col-backgrnd);
     padding: 10px 10px;
     box-sizing: border-box;
     white-space: nowrap;
