@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request
+from pathlib import Path
 import sqlite3, os
 import subprocess
 # systemctl --user restart service-grxcm-db
@@ -6,6 +7,20 @@ import subprocess
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATENBANK = "/home/tm/Laufwerk-T/GarminEdge130Plus-fit/fitdb.db"
 app = Flask(__name__, template_folder="templates", static_folder="static")
+
+def get_versiontxt():
+    try:
+        pfad = os.path.join(BASE_DIR, "version.txt")
+        if os.path.exists(pfad):
+            return Path(pfad).read_text(encoding="utf-8").strip()
+    except Exception:
+        pass
+    return "dev"
+
+@app.context_processor
+def inject_version():
+    return dict(versiontxt=get_versiontxt())
+
 
 @app.route("/")
 def index(): 
