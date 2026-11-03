@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 import sqlite3, os
 import subprocess
+# systemctl --user restart service-grxcm-db
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATENBANK = "/home/tm/Laufwerk-T/GarminEdge130Plus-fit/fitdb.db"
@@ -55,4 +56,4 @@ def run_fitimportpy():
         }), 500
 
 if __name__ == "__main__":
-    app.run(host="localhost", port=5000, debug=True)
+    app.run(host="localhost", port=5000, debug=False)
