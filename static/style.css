@@ -358,3 +358,43 @@ body {
     mix-blend-mode: multiply;
     filter: contrast(150%) brightness(100%);
 }
+
+
+/*
+  -----------------------------------------------------------------------
+    LÖSCHEN-BUTTON & BESTÄTIGUNG
+  -----------------------------------------------------------------------
+*/
+
+.button-loeschen {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    opacity: 0.8;
+    color: hsl(0, 0%, 65%); /* Standard: Dezent grau (inaktiv) */
+    pointer-events: none;     /* Standard: Nicht klickbar solange keine Tour gewählt */
+    transition: color 0.2s ease;
+}
+
+.button-loeschen.aktiv {
+    color: var(--col-akzent1); /* Grün (wie fitimport) */
+    pointer-events: auto;     /* Jetzt klickbar */
+}
+
+.button-loeschen.bestaetigung {
+    color: hsl(0, 100%, 50%); /* Rot beim ersten Klick */
+}
+
+/* Roter Hintergrund für die Zeile im Bestätigungsmodus */
+.tabelle tbody tr.loesch-bestaetigung {
+    background-color: color-mix(in srgb, hsl(0, 100%, 50%) 15%, var(--col-backgrnd)) !important;
+}

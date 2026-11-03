@@ -33,6 +33,14 @@ def update_activity(activity_id):
 
     return jsonify({"success": True, "id": activity_id, "spalte": spalte, "wert": wert})
 
+@app.route("/api/activities/<int:activity_id>", methods=["DELETE"])
+def delete_activity(activity_id):
+    with sqlite3.connect(DATENBANK) as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM activities WHERE id = ?", (activity_id,))
+        conn.commit()
+    return jsonify({"success": True, "id": activity_id})
+
 @app.route("/api/fitimportpy", methods=["POST"])
 def run_fitimportpy():
     try:

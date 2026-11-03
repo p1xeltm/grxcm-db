@@ -2,6 +2,7 @@
 let alleAktivitaeten = [];
 let map = null;
 let aktuellerTrackLayer = null;
+let aktiveActivityId = null;
 
 
 /*
@@ -158,7 +159,7 @@ function rendereTabelle(liste) {
                 <span class="datum-text">${formatDatum(zeile.datum)}</span>
             </td>
             <td class="spalte-align-center rad-zelle ${radKlasse}" data-id="${zeile.id}" title="${zeile.rad || ''}">${radSymbol}</td>
-            <td class="spalte-align-left edit-zelle" data-id="${zeile.id}" data-spalte="titel" contenteditable="false" spellcheck="false"><span class="edit-text">${zeile.titel || ''}</span></td>
+            <td class="spalte-align-left edit-zelle" data-id="${zeile.id}" data-spalte="titel" contenteditable="false" spellcheck="false">${zeile.titel || ''}</td>
             <td class="spalte-align-right">${formatZahl(zeile.distanz)}</td>
             <td class="spalte-align-right">${zeile.anstieg ?? ''}</td>
             <td class="spalte-align-right">${formatZeit(zeile.zeit)}</td>
@@ -177,8 +178,7 @@ function abbrechen(element, zielWert) {
         element.value = zielWert;
         rendereTabelle(alleAktivitaeten);
     } else {
-        const textSpan = element.querySelector('.edit-text');
-        (textSpan || element).textContent = zielWert;
+        element.textContent = zielWert;
     }
     element.blur();
 }
@@ -256,6 +256,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Verbindungsfehler beim Import:', err);
             } finally {
                 importBtn.classList.remove('laden');
+            }
+        });
+    }
+
+    // Event-Listener für den Lösch-Button
+    const loeschBtn = document.getElementById('button-loeschen');
+    if (loeschBtn) {
+        loeschBtn.addEventListener('click', async () => {
+            if (!aktiveActivityId) return;
+
+            const aktiveZeile = document.querySelector('#daten tr.aktive-zeile');
+
+            // 1. Klick: In den Bestätigungsmodus wechseln (Rot)
+            if (!loeschBtn.classList.contains('bestaetigung')) {
+                loeschBtn.classList.add('bestaetigung');
+                if (aktiveZeile) {
+                    aktiveZeile.classList.add('loesch-bestaetigung');
+                }
+                return;
+            }
+
+            // 2. Klick: Tatsächlich löschen
+            try {
+                const antwort = await fetch(`/api/activities/${aktiveActivityId}`, { method: 'DELETE' });
+                const ergebnis = await antwort.json();
+
+                if (ergebnis.success) {
+                    // Aus lokalem Array entfernen
+                    alleAktivitaeten = alleAktivitaeten.filter(a => a.id !== aktiveActivityId);
+                    
+                    // Auswahl zurücksetzen
+                    aktiveActivityId = null;
+                    loeschBtn.classList.remove('aktiv', 'bestaetigung');
+                    loeschBtn.textContent = '✗';
+
+                    // Track von Karte entfernen falls aktiv
+                    if (aktuellerTrackLayer && map) {
+                        map.removeLayer(aktuellerTrackLayer);
+                        aktuellerTrackLayer = null;
+                    }
+
+                    // Tabelle neu rendern
+                    rendereTabelle(alleAktivitaeten);
+                } else {
+                    console.error('Fehler beim Löschen der Tour.');
+                }
+            } catch (err) {
+                console.error('Verbindungsfehler beim Löschen:', err);
             }
         });
     }
@@ -342,13 +390,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const tr = e.target.closest('tr');
         if (tr) {
-            document.querySelectorAll('#daten tr').forEach(row => row.classList.remove('aktive-zeile'));
+            document.querySelectorAll('#daten tr').forEach(row => {
+                row.classList.remove('aktive-zeile');
+                row.classList.remove('loesch-bestaetigung');
+            });
             tr.classList.add('aktive-zeile');
 
             const idZelle = tr.querySelector('.edit-zelle') || tr.querySelector('.fav-zelle') || tr.querySelector('.rad-zelle');
             if (idZelle && idZelle.dataset.id) {
-                const activityId = Number(idZelle.dataset.id);
-                zeigeTrackAufKarte(activityId);
+                aktiveActivityId = Number(idZelle.dataset.id);
+                
+                // Lösch-Button aktivieren und Bestätigung zurücksetzen
+                const loeschBtn = document.getElementById('button-loeschen');
+                if (loeschBtn) {
+                    loeschBtn.classList.add('aktiv');
+                    loeschBtn.classList.remove('bestaetigung');
+                    loeschBtn.textContent = '✗';
+                }
+
+                zeigeTrackAufKarte(aktiveActivityId);
             }
         }
     });
@@ -368,14 +428,12 @@ let alterZellenWert = '';
 document.getElementById('daten').addEventListener('focusin', function(e) {
     if (!e.target.classList.contains('edit-zelle')) return;
 
-    const textSpan = e.target.querySelector('.edit-text');
-    alterZellenWert = textSpan ? textSpan.textContent : e.target.textContent;
+    alterZellenWert = e.target.textContent;
 
     setTimeout(() => {
-        const zielKnoten = textSpan || e.target;
         const range = document.createRange();
         const sel = window.getSelection();
-        range.selectNodeContents(zielKnoten);
+        range.selectNodeContents(e.target);
         range.collapse(false);
         sel.removeAllRanges();
         sel.addRange(range);
@@ -390,16 +448,14 @@ document.getElementById('daten').addEventListener('focusout', function(e) {
     const activityId = Number(editZelle.dataset.id);
     const spalte = editZelle.dataset.spalte;
     
-    const textSpan = editZelle.querySelector('.edit-text');
-    const neuerWert = (textSpan ? textSpan.textContent : editZelle.textContent).trim();
+    const neuerWert = editZelle.textContent.trim();
     
     editZelle.setAttribute('contenteditable', 'false');
 
     if (spalte === 'rad') {
         editZelle.className = `spalte-align-left edit-zelle ${getRadKlasse(neuerWert)}`;
     } else {
-        // Ohne das »-Icon: Nur den reinen Text-Span beibehalten
-        editZelle.innerHTML = `<span class="edit-text">${neuerWert}</span>`;
+        editZelle.textContent = neuerWert;
     }
 
     update_dbFeld(activityId, spalte, neuerWert);
