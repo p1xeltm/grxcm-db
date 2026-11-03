@@ -329,3 +329,14 @@ body {
     cursor: text;
     outline: 1px solid var(--col-main2);
 }
+
+
+/*
+  -----------------------------------------------------------------------
+    HILLSHADING
+  -----------------------------------------------------------------------
+*/
+.hillshade-layer {
+    mix-blend-mode: multiply;
+    filter: contrast(150%) brightness(100%); 
+}

@@ -10,7 +10,7 @@ let aktuellerTrackLayer = null;
   ================================================================================= 
 */
 
-// Funktion: Initialisierung Leaflet-Karte
+// Funktion: Initialisierung Leaflet-Karte mit robustem Hillshading-Overlay
 function initKarte() {
     const mapElement = document.getElementById('osmkarte');
     if (!mapElement) return;
@@ -20,8 +20,17 @@ function initKarte() {
         attributionControl: false
     }).setView([48.5328, 9.3170], 13);
 
+    // 1. Basis-Karte (OpenStreetMap)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19
+    }).addTo(map);
+
+    // 2. Hillshading-Overlay mit Blend-Mode
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        opacity: 1, // Kann jetzt höher sein, da der Schleier wegfällt!
+        className: 'hillshade-layer', // Verknüpft es mit dem CSS-Blend-Mode
+        attribution: 'Esri, USGS, NOAA'
     }).addTo(map);
 }
 
