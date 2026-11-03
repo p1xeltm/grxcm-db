@@ -105,14 +105,8 @@ function formatZeit(sekunden) {
 // Hilfsfunktion: Ermittlung CSS-Klasse für jeweiliges Rad
 function getRadKlasse(radName) {
     if (!radName) return '';
-    const name = radName.toLowerCase().trim();
-    
-    if (name.includes('exceed')) return 'rad-exceed';
-    if (name.includes('terra'))  return 'rad-terra';
-    if (name.includes('c62o'))   return 'rad-c62o';
-    if (name.includes('slx99'))  return 'rad-slx99';
-    
-    return '';
+    const name = radName.toLowerCase().trim().replace('#', '');
+    return name ? `rad-${name}` : '';
 }
 
 // Funktion: Aktualisieren von Datenbank-Feldern
@@ -335,8 +329,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const aktivitaet = alleAktivitaeten.find(a => a.id === activityId);
                 if (!aktivitaet) return;
 
-                // Liste aller verfügbaren Rad-Klassen (inkl. Leer-Option zum Zurücksetzen)
-                const raeder = ['', 'Exceed', 'Terra', 'C62o', 'Slx99'];
+                // Liste der verfügbaren Rad-Klassen
+                const raeder = ['', '#exceed', '#terra', '#c62o', '#slx99'];
                 const aktuellesRad = aktivitaet.rad || '';
                 
                 // Aktuellen Index finden und zum nächsten springen
