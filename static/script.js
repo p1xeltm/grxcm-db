@@ -149,7 +149,7 @@ function rendereTabelle(liste) {
                 <span class="datum-text">${formatDatum(zeile.datum)}</span>
             </td>
             <td class="spalte-align-center rad-zelle ${radKlasse}" data-id="${zeile.id}" title="${zeile.rad || ''}">${radSymbol}</td>
-            <td class="spalte-align-left edit-zelle" data-id="${zeile.id}" data-spalte="titel" contenteditable="false" spellcheck="false"><span class="edit-text">${zeile.titel || ''}</span><span class="icon-edit">»</span></td>
+            <td class="spalte-align-left edit-zelle" data-id="${zeile.id}" data-spalte="titel" contenteditable="false" spellcheck="false"><span class="edit-text">${zeile.titel || ''}</span></td>
             <td class="spalte-align-right">${formatZahl(zeile.distanz)}</td>
             <td class="spalte-align-right">${zeile.anstieg ?? ''}</td>
             <td class="spalte-align-right">${formatZeit(zeile.zeit)}</td>
@@ -283,12 +283,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (e.target.classList.contains('icon-edit')) {
-            const editZelle = e.target.closest('.edit-zelle');
-            if (!editZelle) return;
-
-            editZelle.setAttribute('contenteditable', 'true');
-            editZelle.focus();
+        const radZelle = e.target.closest('.rad-zelle');
+        if (radZelle) {
+            const tr = radZelle.closest('tr');
+            const titelZelle = tr.querySelector('.edit-zelle');
+            if (titelZelle) {
+                titelZelle.setAttribute('contenteditable', 'true');
+                titelZelle.focus();
+            }
             return;
         }
 
@@ -346,10 +348,12 @@ document.getElementById('daten').addEventListener('focusout', function(e) {
     const neuerWert = (textSpan ? textSpan.textContent : editZelle.textContent).trim();
     
     editZelle.setAttribute('contenteditable', 'false');
-    editZelle.innerHTML = `<span class="edit-text">${neuerWert}</span><span class="icon-edit">»</span>`;
 
     if (spalte === 'rad') {
         editZelle.className = `spalte-align-left edit-zelle ${getRadKlasse(neuerWert)}`;
+    } else {
+        // Ohne das »-Icon: Nur den reinen Text-Span beibehalten
+        editZelle.innerHTML = `<span class="edit-text">${neuerWert}</span>`;
     }
 
     update_dbFeld(activityId, spalte, neuerWert);

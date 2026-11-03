@@ -325,25 +325,6 @@ body {
     padding-right: 0;
 }
 
-.icon-edit {
-    display: inline-block;
-    margin-left: 6px;
-    opacity: 0;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-    color: var(--col-grau75);
-    user-select: none;
-}
-
-.edit-zelle:hover .icon-edit {
-    opacity: 1;
-}
-
-.edit-zelle:focus .icon-edit {
-    display: none;
-}
-
 .edit-zelle:focus {
     cursor: text;
     outline: 1px solid var(--col-main2);
