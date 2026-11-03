@@ -299,7 +299,7 @@ body {
 }
 
 .tabelle tbody tr.aktive-zeile {
-    background-color: var(--col-backgrnd) !important;
+    background-color: color-mix(in srgb, var(--col-akzent1) 21%, var(--col-backgrnd)) !important;
 }
 .tabelle tbody tr {
     cursor: pointer;
