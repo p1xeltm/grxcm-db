@@ -267,6 +267,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Event-Listener für den Mittelklick auf die Rad-Zelle zum Durchschalten der Räder
+    document.getElementById('daten').addEventListener('auxclick', function(e) {
+        if (e.button === 1) { // 1 steht für die mittlere Maustaste
+            const radZelle = e.target.closest('.rad-zelle');
+            if (radZelle) {
+                e.preventDefault(); // Verhindert das automatische Browser-Scrollen
+                
+                const activityId = Number(radZelle.dataset.id);
+                const aktivitaet = alleAktivitaeten.find(a => a.id === activityId);
+                if (!aktivitaet) return;
+
+                // Liste aller verfügbaren Rad-Klassen (inkl. Leer-Option zum Zurücksetzen)
+                const raeder = ['', 'Exceed', 'Terra', 'C62o', 'Slx99'];
+                const aktuellesRad = aktivitaet.rad || '';
+                
+                // Aktuellen Index finden und zum nächsten springen
+                let currentIndex = raeder.findIndex(r => r.toLowerCase() === aktuellesRad.toLowerCase());
+                if (currentIndex === -1) currentIndex = 0;
+                
+                const naechsterIndex = (currentIndex + 1) % raeder.length;
+                const naechstesRad = raeder[naechsterIndex];
+
+                // Lokal im Array speichern
+                aktivitaet.rad = naechstesRad;
+
+                // UI direkt aktualisieren
+                const radKlasse = getRadKlasse(naechstesRad);
+                radZelle.className = `spalte-align-center rad-zelle ${radKlasse}`;
+                radZelle.setAttribute('title', naechstesRad);
+                radZelle.textContent = naechstesRad ? '◉' : '';
+
+                // In der Datenbank speichern
+                update_dbFeld(activityId, 'rad', naechstesRad);
+            }
+        }
+    });
+
     // Event-Listener für Klicks (edit_fav, Icon-Klick bei edit-Zellen & Zeilenauswahl)
     document.getElementById('daten').addEventListener('click', function(e) {
         const favZelle = e.target.closest('.fav-zelle');
