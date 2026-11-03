@@ -5,27 +5,23 @@
 */
 
 :root {
-    --col-main1:    hsl(207, 100%, 17%);
-    --col-main2:    hsl(207, 100%, 30%);
-
-    --col-weiss:    hsl(0, 0%, 100%);
-    --col-grau95:   hsl(0, 0%, 95%);
-    --col-grau85:   hsl(0, 0%, 85%);
-    --col-grau75:   hsl(0, 0%, 75%);
-    --col-grau60:   hsl(0, 0%, 60%);
-    --col-schwarz:  hsl(0, 0%, 10%);
+    --col-akzent1:  hsl(180, 90%, 20%);
+    --col-backgrnd: hsl(0, 0%, 100%);
+    --col-tabelle:  hsl(180, 10%, 95%);
+    --col-text1:    hsl(0, 0%, 5%);
+    --col-text2:    hsl(0, 0%, 95%);
 
     --col-exceed:   hsl(25, 100%, 50%);
-    --col-terra:    hsl(190, 50%, 60%);
+    --col-terra:    hsl(190, 64%, 67%);
     --col-c62o:     hsl(0, 0%, 40%);
     --col-slx99:    hsl(190, 80%, 30%);
 }
 
     /* Rad-Klassen u Farben */
-    .rad-exceed { color: var(--col-exceed); }
-    .rad-terra  { color: var(--col-terra);  }
-    .rad-c62o   { color: var(--col-c62o);   }
-    .rad-slx99  { color: var(--col-slx99);  }
+    .tabelle td.rad-exceed { color: var(--col-exceed); }
+    .tabelle td.rad-terra  { color: var(--col-terra);  }
+    .tabelle td.rad-c62o   { color: var(--col-c62o);   }
+    .tabelle td.rad-slx99  { color: var(--col-slx99);  }
 
 
 
@@ -44,7 +40,7 @@ html, body {
 
 body {
     font-family: sans-serif;
-    background-color: var(--col-grau95);
+    background-color: var(--col-backgrnd);
     display: flex;
     flex-direction: column;
 }
@@ -93,7 +89,7 @@ body {
 .container-osmkarte {
     width: 100%;
     height: 60%;
-    background-color: var(--col-grau95);
+    background-color: var(--col-backgrnd);
     box-sizing: border-box;
     display: block;
     overflow: hidden;
@@ -102,7 +98,7 @@ body {
 .container-hoehenprofil {
     width: 100%;
     flex: 1;
-    background-color: var(--col-grau85);
+    background-color: hsl(190, 24%, 87%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -119,7 +115,7 @@ body {
 */
 
 .banner-balken {
-    background-color: var(--col-main1);
+    background-color: var(--col-akzent1);
     padding: 12px 20px;
     display: flex;
     justify-content: space-between;
@@ -138,7 +134,7 @@ body {
 }
 
 .banner-titel {
-    color: var(--col-weiss);
+    color: var(--col-text2);
     font-size: 1.2rem;
     font-weight: bold;
 }
@@ -153,10 +149,11 @@ body {
 }
 
 .banner-version {
-    color: var(--col-grau85);
-    font-size: 0.8rem;
+    color: var(--col-text2);
+    font-size: 0.7rem;
     font-weight: normal;
     letter-spacing: 1px;
+    opacity: 0.7;
 }
 
 .banner-git-icon {
@@ -189,7 +186,7 @@ body {
     background: none;
     border: none;
     padding: 0;
-    color: var(--col-main2);
+    color: var(--col-akzent1);
     font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
@@ -197,16 +194,16 @@ body {
     align-items: center;
     justify-content: center;
     line-height: 1;
-    opacity: 0.6;
+    opacity: 0.8;
 }
 
 .suche-box {
     appearance: none;
     -webkit-appearance: none;
-    background-color: var(--col-weiss);
+    background-color: var(--col-tabelle);
     padding: 0 10px;
     font-size: 0.85rem;
-    border: 0px solid var(--col-grau85);
+    border: 0px solid var(--col-backgrnd);
     outline: none;
     width: 200px;
     height: 100%;
@@ -214,8 +211,8 @@ body {
 }
 
 .suche-box:focus {
-    border-color: var(--col-main2);
-    box-shadow: 0 0 0 1px var(--col-main2);
+    border-color: var(--col-akzent1);
+    box-shadow: 0 0 0 1px var(--col-akzent1);
 }
 
 
@@ -228,42 +225,59 @@ body {
 .tabelle-wrapper {
     flex: 1;
     overflow-y: auto;
-    background-color: var(--col-weiss);
-    border: 15px solid var(--col-weiss);
+    border: none;
+    padding: 0;
     box-sizing: border-box;
 }
 
 .tabelle {
     width: 100%;
     font-family: inherit;
-    border-collapse: separate;
+    border-collapse: collapse;
     border-spacing: 0;
     table-layout: fixed;
-    background-color: var(--col-weiss);
+    background-color: var(--col-tabelle);
     box-sizing: border-box;
 }
 
-.tabelle th, .tabelle td {
+.tabelle th {
+    color: var(--col-akzent1);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: var(--col-tabelle);
+    padding: 10px 10px 10px 10px;
+    box-sizing: border-box;
+    border-bottom: none;
+}
+
+.tabelle th::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background-color: var(--col-akzent1);
+}
+
+.tabelle td {
     font-family: inherit;
-    border-bottom: 1px solid var(--col-grau85);
-    padding: 6px 10px;
+    color: var(--col-text1);
+    border-bottom: 4px solid var(--col-backgrnd);
+    padding: 10px 10px;
     box-sizing: border-box;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.tabelle th {
-    color: var(--col-main2);
-    border-bottom: 2px solid var(--col-main2);
-    position: sticky;
-    top: 0;
-    background-color: var(--col-weiss);
-    z-index: 10;
+.tabelle td.fav-zelle {
+    color: var(--col-akzent1);
 }
 
 .tabelle tbody tr:hover {
-    background-color: var(--col-grau95);
+    background-color: var(--col-backgrnd);
 }
 
 .spalte-align-left   { text-align: left; }
@@ -283,12 +297,13 @@ body {
     display: inline-block;
     transform: scale(0.85);
     transform-origin: left center;
-    color: var(--col-grau60) !important;
+    color:var(--col-text1) !important;
+    opacity: 0.47;
     font-weight: normal;
 }
 
 .tabelle tbody tr.aktive-zeile {
-    background-color: var(--col-grau85) !important;
+    background-color: var(--col-backgrnd) !important;
 }
 .tabelle tbody tr {
     cursor: pointer;
@@ -305,7 +320,7 @@ body {
 .fav-zelle {
     cursor: pointer;
     user-select: none;
-    color: var(--col-main2);
+    color: var(--col-akzent1);
 }
 .fav-zelle:not(.ist-favorit):hover::before {
     content: '★';
@@ -327,7 +342,7 @@ body {
 
 .edit-zelle:focus {
     cursor: text;
-    outline: 1px solid var(--col-main2);
+    outline: 1px solid var(--col-akzent1);
 }
 
 
