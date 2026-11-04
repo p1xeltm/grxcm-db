@@ -8,7 +8,7 @@ let alterZellenWert = '';
 
 /*
   =================================================================================
-    HILFS- UND RENDERING-FUNKTIONEN
+    F U N K T I O N E N
   ================================================================================= 
 */
 
@@ -162,6 +162,20 @@ function rendereTabelle(liste) {
     });
 }
 
+// Reset der aktiven Auswahl, Lösch-Button und Track-Layer
+function resetAuswahl() {
+    aktiveActivityId = null;
+    const loeschBtn = document.getElementById('button-loeschen');
+    if (loeschBtn) {
+        loeschBtn.classList.remove('aktiv', 'bestaetigung');
+        loeschBtn.textContent = '✗';
+    }
+    if (aktuellerTrackLayer && map) {
+        map.removeLayer(aktuellerTrackLayer);
+        aktuellerTrackLayer = null;
+    }
+}
+
 // Funktion: Abbruch via Esc in Datenfeld oder Suchfeld
 function AbbruchEsc(element, zielWert) {
     if (element.id === 'suche') {
@@ -240,6 +254,8 @@ function initListenerImport() {
             const ergebnis = await antwort.json();
 
             if (ergebnis.success) {
+                resetAuswahl(); // <--- Hier Auswahl & Button zurücksetzen!
+                
                 const res = await fetch('/api/activities');
                 alleAktivitaeten = await res.json();
                 rendereTabelle(alleAktivitaeten);
@@ -276,16 +292,7 @@ function initListenerLoeschen() {
 
             if (ergebnis.success) {
                 alleAktivitaeten = alleAktivitaeten.filter(a => a.id !== aktiveActivityId);
-
-                aktiveActivityId = null;
-                loeschBtn.classList.remove('aktiv', 'bestaetigung');
-                loeschBtn.textContent = '✗';
-
-                if (aktuellerTrackLayer && map) {
-                    map.removeLayer(aktuellerTrackLayer);
-                    aktuellerTrackLayer = null;
-                }
-
+                resetAuswahl();
                 rendereTabelle(alleAktivitaeten);
             }
         } catch (err) {}
@@ -336,7 +343,6 @@ function initListenerRadMittelklick() {
                 const naechstesRad = raeder[naechsterIndex];
 
                 aktivitaet.rad = naechstesRad;
-
                 const radKlasse = getRadKlasse(naechstesRad);
                 radZelle.className = `spalte-align-center rad-zelle ${radKlasse}`;
                 radZelle.setAttribute('title', naechstesRad);
