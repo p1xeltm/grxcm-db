@@ -306,13 +306,27 @@ function initListenerTastatur() {
         const istSuche = el.id === 'suche';
         const istEdit = el.classList?.contains('edit-zelle');
 
-        if (!istSuche && !istEdit) return;
+        if (e.key === 'Escape') {
+            // Prüfung, ob Lösch-Bestätigungsmodus aktiv ist
+            const loeschBtn = document.getElementById('button-loeschen');
+            if (loeschBtn && loeschBtn.classList.contains('bestaetigung')) {
+                e.preventDefault();
+                loeschBtn.classList.remove('bestaetigung');
+                
+                const loeschZeile = document.querySelector('#daten tr.loesch-bestaetigung');
+                if (loeschZeile) {
+                    loeschZeile.classList.remove('loesch-bestaetigung');
+                }
+                return;
+            }
+            // Esc für Suchfeld und Editiermodus
+            if (!istSuche && !istEdit) return;
+            AbbruchEsc(el, istSuche ? '' : alterZellenWert);
 
-        if (e.key === 'Enter') {
+        } else if (e.key === 'Enter') {
+            if (!istSuche && !istEdit) return;
             e.preventDefault();
             el.blur();
-        } else if (e.key === 'Escape') {
-            AbbruchEsc(el, istSuche ? '' : alterZellenWert);
         }
     });
 }
