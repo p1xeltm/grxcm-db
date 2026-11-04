@@ -3,11 +3,12 @@ let alleAktivitaeten = [];
 let map = null;
 let aktuellerTrackLayer = null;
 let aktiveActivityId = null;
+let alterZellenWert = '';
 
 
 /*
   =================================================================================
-    FUNKTIONEN
+    HILFS- UND RENDERING-FUNKTIONEN
   ================================================================================= 
 */
 
@@ -21,12 +22,12 @@ function initKarte() {
         attributionControl: false
     }).setView([48.5328, 9.3170], 13);
 
-    // 1. Basis-Karte (OpenStreetMap)
+    // Basis-Karte (OpenStreetMap)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19
     }).addTo(map);
 
-    // 2. Hillshading-Overlay
+    // Hillshading-Overlay
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
         opacity: 0.9,
@@ -43,11 +44,6 @@ function zeigeTrackAufKarte(activityId) {
     if (aktuellerTrackLayer) {
         map.removeLayer(aktuellerTrackLayer);
         aktuellerTrackLayer = null;
-    }
-
-    if (!aktivitaet.track) {
-        console.warn('Kein Track für diese Aktivität vorhanden.');
-        return;
     }
 
     try {
@@ -102,7 +98,7 @@ function formatZeit(sekunden) {
     return `${h}:${mStr}:${sStr}`;
 }
 
-// Hilfsfunktion: Ermittlung CSS-Klasse für jeweiliges Rad
+// Funktion: Ermittlung CSS-Klasse für jeweiliges Rad
 function getRadKlasse(radName) {
     if (!radName) return '';
     const name = radName.toLowerCase().trim().replace('#', '');
@@ -167,7 +163,7 @@ function rendereTabelle(liste) {
 }
 
 // Funktion: Abbruch via Esc in Datenfeld oder Suchfeld
-function abbrechen(element, zielWert) {
+function AbbruchEsc(element, zielWert) {
     if (element.id === 'suche') {
         element.value = zielWert;
         rendereTabelle(alleAktivitaeten);
@@ -177,18 +173,8 @@ function abbrechen(element, zielWert) {
     element.blur();
 }
 
-
-/*
-  =================================================================================
-    INITIALISIERUNG & ABFRAGEN
-  ================================================================================= 
-*/
-
-document.addEventListener('DOMContentLoaded', () => {
-    
-    initKarte();
-
-    // Abruf der Daten von API
+// Funktion: Datenabruf von API
+function ladeAktivitaeten() {
     fetch('/api/activities')
         .then(antwort => antwort.json())
         .then(liste => {
@@ -196,9 +182,21 @@ document.addEventListener('DOMContentLoaded', () => {
             rendereTabelle(alleAktivitaeten);
         })
         .catch(err => console.error('Fehler beim Laden der Aktivitäten:', err));
+}
 
-    // Event-Listener für Suchfeld
-    document.getElementById('suche').addEventListener('input', function(e) {
+
+/*
+  =================================================================================
+    EVENT-LISTENER INIT-FUNKTIONEN
+  ================================================================================= 
+*/
+
+// **** Listener: Suchfeld
+function initListenerSuchfeld() {
+    const sucheInput = document.getElementById('suche');
+    if (!sucheInput) return;
+
+    sucheInput.addEventListener('input', function(e) {
         const begriff = e.target.value.toLowerCase().trim();
         
         const gefiltert = alleAktivitaeten.find ? alleAktivitaeten.filter(zeile => {
@@ -226,83 +224,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
         rendereTabelle(gefiltert);
     });
+}
 
-    // Event-Listener für fitimport.py-Button
+// **** Listener: Button 'fitimport.py'
+function initListenerImport() {
     const importBtn = document.getElementById('button-fitimportpy');
-    if (importBtn) {
-        importBtn.addEventListener('click', async () => {
-            if (importBtn.classList.contains('laden')) return;
+    if (!importBtn) return;
 
-            importBtn.classList.add('laden');
+    importBtn.addEventListener('click', async () => {
+        if (importBtn.classList.contains('laden')) return;
+        importBtn.classList.add('laden');
 
-            try {
-                const antwort = await fetch('/api/fitimportpy', { method: 'POST' });
-                const ergebnis = await antwort.json();
+        try {
+            const antwort = await fetch('/api/fitimportpy', { method: 'POST' });
+            const ergebnis = await antwort.json();
 
-                if (ergebnis.success) {
-                    const res = await fetch('/api/activities');
-                    alleAktivitaeten = await res.json();
-                    rendereTabelle(alleAktivitaeten);
-                } else {
-                    console.error('Import-Fehler:', ergebnis.error);
-                }
-            } catch (err) {
-                console.error('Verbindungsfehler beim Import:', err);
-            } finally {
-                importBtn.classList.remove('laden');
+            if (ergebnis.success) {
+                const res = await fetch('/api/activities');
+                alleAktivitaeten = await res.json();
+                rendereTabelle(alleAktivitaeten);
             }
-        });
-    }
+        } finally {
+            importBtn.classList.remove('laden');
+        }
+    });
+}
 
-    // Event-Listener für den Lösch-Button
+// **** Listener: Button 'Tour löschen'
+function initListenerLoeschen() {
     const loeschBtn = document.getElementById('button-loeschen');
-    if (loeschBtn) {
-        loeschBtn.addEventListener('click', async () => {
-            if (!aktiveActivityId) return;
+    if (!loeschBtn) return;
 
-            const aktiveZeile = document.querySelector('#daten tr.aktive-zeile');
+    loeschBtn.addEventListener('click', async () => {
+        if (!aktiveActivityId) return;
 
-            // 1. Klick: In den Bestätigungsmodus wechseln (Rot)
-            if (!loeschBtn.classList.contains('bestaetigung')) {
-                loeschBtn.classList.add('bestaetigung');
-                if (aktiveZeile) {
-                    aktiveZeile.classList.add('loesch-bestaetigung');
-                }
-                return;
+        const aktiveZeile = document.querySelector('#daten tr.aktive-zeile');
+
+        // Klick 1: Wechsel in Bestätigungsmodus
+        if (!loeschBtn.classList.contains('bestaetigung')) {
+            loeschBtn.classList.add('bestaetigung');
+            if (aktiveZeile) {
+                aktiveZeile.classList.add('loesch-bestaetigung');
             }
+            return;
+        }
 
-            // 2. Klick: Tatsächlich löschen
-            try {
-                const antwort = await fetch(`/api/activities/${aktiveActivityId}`, { method: 'DELETE' });
-                const ergebnis = await antwort.json();
+        // Klick 2: tatsächliches Löschen
+        try {
+            const antwort = await fetch(`/api/activities/${aktiveActivityId}`, { method: 'DELETE' });
+            const ergebnis = await antwort.json();
 
-                if (ergebnis.success) {
-                    // Aus lokalem Array entfernen
-                    alleAktivitaeten = alleAktivitaeten.filter(a => a.id !== aktiveActivityId);
-                    
-                    // Auswahl zurücksetzen
-                    aktiveActivityId = null;
-                    loeschBtn.classList.remove('aktiv', 'bestaetigung');
-                    loeschBtn.textContent = '✗';
+            if (ergebnis.success) {
+                alleAktivitaeten = alleAktivitaeten.filter(a => a.id !== aktiveActivityId);
 
-                    // Track von Karte entfernen falls aktiv
-                    if (aktuellerTrackLayer && map) {
-                        map.removeLayer(aktuellerTrackLayer);
-                        aktuellerTrackLayer = null;
-                    }
+                aktiveActivityId = null;
+                loeschBtn.classList.remove('aktiv', 'bestaetigung');
+                loeschBtn.textContent = '✗';
 
-                    // Tabelle neu rendern
-                    rendereTabelle(alleAktivitaeten);
-                } else {
-                    console.error('Fehler beim Löschen der Tour.');
+                if (aktuellerTrackLayer && map) {
+                    map.removeLayer(aktuellerTrackLayer);
+                    aktuellerTrackLayer = null;
                 }
-            } catch (err) {
-                console.error('Verbindungsfehler beim Löschen:', err);
-            }
-        });
-    }
 
-    // Zentrale Tastatur-Event-Steuerung
+                rendereTabelle(alleAktivitaeten);
+            }
+        } catch (err) {}
+    });
+}
+
+// **** Listener: Zentrale Tastatur-Steuerung (Enter / Esc)
+function initListenerTastatur() {
     document.addEventListener('keydown', (e) => {
         const el = e.target;
         const istSuche = el.id === 'suche';
@@ -314,16 +305,21 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             el.blur();
         } else if (e.key === 'Escape') {
-            abbrechen(el, istSuche ? '' : alterZellenWert);
+            AbbruchEsc(el, istSuche ? '' : alterZellenWert);
         }
     });
+}
 
-    // Event-Listener für den Mittelklick auf die Rad-Zelle zum Durchschalten der Räder
-    document.getElementById('daten').addEventListener('auxclick', function(e) {
-        if (e.button === 1) { // 1 steht für die mittlere Maustaste
+// **** Listener: Mittelklick auf Rad-Klasse
+function initListenerRadMittelklick() {
+    const daten = document.getElementById('daten');
+    if (!daten) return;
+
+    daten.addEventListener('auxclick', function(e) {
+        if (e.button === 1) {
             const radZelle = e.target.closest('.rad-zelle');
             if (radZelle) {
-                e.preventDefault(); // Verhindert das automatische Browser-Scrollen
+                e.preventDefault();
                 
                 const activityId = Number(radZelle.dataset.id);
                 const aktivitaet = alleAktivitaeten.find(a => a.id === activityId);
@@ -333,30 +329,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 const raeder = ['', '#exceed', '#terra', '#c62o', '#slx99'];
                 const aktuellesRad = aktivitaet.rad || '';
                 
-                // Aktuellen Index finden und zum nächsten springen
                 let currentIndex = raeder.findIndex(r => r.toLowerCase() === aktuellesRad.toLowerCase());
                 if (currentIndex === -1) currentIndex = 0;
                 
                 const naechsterIndex = (currentIndex + 1) % raeder.length;
                 const naechstesRad = raeder[naechsterIndex];
 
-                // Lokal im Array speichern
                 aktivitaet.rad = naechstesRad;
 
-                // UI direkt aktualisieren
                 const radKlasse = getRadKlasse(naechstesRad);
                 radZelle.className = `spalte-align-center rad-zelle ${radKlasse}`;
                 radZelle.setAttribute('title', naechstesRad);
                 radZelle.textContent = naechstesRad ? '◉' : '';
 
-                // In der Datenbank speichern
                 update_dbFeld(activityId, 'rad', naechstesRad);
             }
         }
     });
+}
 
-    // Event-Listener für Klicks (edit_fav, Icon-Klick bei edit-Zellen & Zeilenauswahl)
-    document.getElementById('daten').addEventListener('click', function(e) {
+// **** Listener: Klicks in der Tabelle (Favorit, Titel editieren, Zeile auswählen)
+function initListenerTabellenKlick() {
+    const daten = document.getElementById('daten');
+    if (!daten) return;
+
+    daten.addEventListener('click', function(e) {
         const favZelle = e.target.closest('.fav-zelle');
         if (favZelle) {
             const activityId = Number(favZelle.dataset.id);
@@ -406,51 +403,68 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+}
 
-});
+// **** Listener: In-Place Editing (focusin & focusout)
+function initListenerEditieren() {
+    const daten = document.getElementById('daten');
+    if (!daten) return;
+
+    // Speicherung Ursprungswert vor Editieren + Cursor an Ende setzen
+    daten.addEventListener('focusin', function(e) {
+        if (!e.target.classList.contains('edit-zelle')) return;
+
+        alterZellenWert = e.target.textContent;
+
+        setTimeout(() => {
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(e.target);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }, 0);
+    });
+
+    // Speichern beim Verlassen eines Feldes
+    daten.addEventListener('focusout', function(e) {
+        const editZelle = e.target.closest('.edit-zelle');
+        if (!editZelle) return;
+
+        const activityId = Number(editZelle.dataset.id);
+        const spalte = editZelle.dataset.spalte;
+        
+        const neuerWert = editZelle.textContent.trim();
+        
+        editZelle.setAttribute('contenteditable', 'false');
+
+        if (spalte === 'rad') {
+            editZelle.className = `spalte-align-left edit-zelle ${getRadKlasse(neuerWert)}`;
+        } else {
+            editZelle.textContent = neuerWert;
+        }
+
+        update_dbFeld(activityId, spalte, neuerWert);
+    });
+}
 
 
 /*
   =================================================================================
-    STEUERUNG BEIM EDITIEREN VON FELDERN (edit_rad, edit_titel)
+    HAUPT-INITIALISIERUNG
   ================================================================================= 
 */
 
-let alterZellenWert = '';
+document.addEventListener('DOMContentLoaded', () => {
+    initKarte();
+    ladeAktivitaeten();
 
-// Speicherung Ursprungswert vor Editieren + Cursor an Ende setzen
-document.getElementById('daten').addEventListener('focusin', function(e) {
-    if (!e.target.classList.contains('edit-zelle')) return;
-
-    alterZellenWert = e.target.textContent;
-
-    setTimeout(() => {
-        const range = document.createRange();
-        const sel = window.getSelection();
-        range.selectNodeContents(e.target);
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }, 0);
-});
-
-// Speichern beim Verlassen eines Feldes
-document.getElementById('daten').addEventListener('focusout', function(e) {
-    const editZelle = e.target.closest('.edit-zelle');
-    if (!editZelle) return;
-
-    const activityId = Number(editZelle.dataset.id);
-    const spalte = editZelle.dataset.spalte;
-    
-    const neuerWert = editZelle.textContent.trim();
-    
-    editZelle.setAttribute('contenteditable', 'false');
-
-    if (spalte === 'rad') {
-        editZelle.className = `spalte-align-left edit-zelle ${getRadKlasse(neuerWert)}`;
-    } else {
-        editZelle.textContent = neuerWert;
-    }
-
-    update_dbFeld(activityId, spalte, neuerWert);
+    // Event-Listener über das Namensschema 'initListener...' initialisieren
+    initListenerSuchfeld();
+    initListenerImport();
+    initListenerLoeschen();
+    initListenerTastatur();
+    initListenerRadMittelklick();
+    initListenerTabellenKlick();
+    initListenerEditieren();
 });
