@@ -162,13 +162,18 @@ function rendereTabelle(liste) {
     });
 }
 
-// Reset der aktiven Auswahl, Lösch-Button und Track-Layer
+// Reset der aktiven Auswahl, Lösch-Button, export-Button und Track-Layer
 function resetAuswahl() {
     aktiveActivityId = null;
     const loeschBtn = document.getElementById('button-loeschen');
+    const exportBtn = document.getElementById('button-export');
+    
     if (loeschBtn) {
         loeschBtn.classList.remove('aktiv', 'bestaetigung');
         loeschBtn.textContent = '✗';
+    }
+    if (exportBtn) {
+        exportBtn.classList.remove('aktiv');
     }
     if (aktuellerTrackLayer && map) {
         map.removeLayer(aktuellerTrackLayer);
@@ -237,6 +242,17 @@ function initListenerSuchfeld() {
         }) : [];
 
         rendereTabelle(gefiltert);
+    });
+}
+
+// **** Listener: Button 'gpx-export'
+function initListenerExport() {
+    const exportBtn = document.getElementById('button-export');
+    if (!exportBtn) return;
+
+    exportBtn.addEventListener('click', () => {
+        if (!aktiveActivityId) return;
+        window.location.href = `/api/activities/${aktiveActivityId}/gpx`;
     });
 }
 
@@ -411,12 +427,17 @@ function initListenerTabellenKlick() {
             if (idZelle && idZelle.dataset.id) {
                 aktiveActivityId = Number(idZelle.dataset.id);
                 
-                // Lösch-Button aktivieren und Bestätigung zurücksetzen
+                // Aktivierung Lösch-Button und Reset Bestätitung zurücksetzen
                 const loeschBtn = document.getElementById('button-loeschen');
                 if (loeschBtn) {
                     loeschBtn.classList.add('aktiv');
                     loeschBtn.classList.remove('bestaetigung');
                     loeschBtn.textContent = '✗';
+                }
+                // Aktivierung Export-Button
+                const exportBtn = document.getElementById('button-export');
+                if (exportBtn) {
+                    exportBtn.classList.add('aktiv');
                 }
 
                 zeigeTrackAufKarte(aktiveActivityId);
@@ -481,6 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event-Listener über das Namensschema 'initListener...' initialisieren
     initListenerSuchfeld();
+    initListenerExport();
     initListenerImport();
     initListenerLoeschen();
     initListenerTastatur();

@@ -192,6 +192,28 @@ body {
     line-height: 1;
 }
 
+.button-export {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 1.1rem;
+    font-weight: normal;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    color: hsl(0, 0%, 80%);
+    pointer-events: none;
+}
+
+.button-export.aktiv {
+    pointer-events: auto;
+    color: var(--col-akzent1);
+}
+
 .suche-box {
     appearance: none;
     -webkit-appearance: none;
@@ -384,6 +406,7 @@ body {
 
 .button-loeschen.aktiv {
     pointer-events: auto;
+    color: var(--col-akzent1);
 }
 
 .button-loeschen.bestaetigung {
