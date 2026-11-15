@@ -423,3 +423,15 @@ body {
 .tabelle tbody tr.loesch-bestaetigung {
     background-color: color-mix(in srgb, hsl(291, 87%, 47%) 15%, var(--col-backgrnd)) !important;
 }
+
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.button-fitimportpy.laden {
+    animation: spin 1s linear infinite;
+    pointer-events: none; /* Verhindert Mehrfachklicks während des Imports */
+    opacity: 0.5;         /* Dezent abgedimmt */
+}
