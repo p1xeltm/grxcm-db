@@ -11,6 +11,7 @@
     --col-tabelle:  hsl(180, 10%, 95%);
     --col-text1:    hsl(0, 0%, 5%);
     --col-text2:    hsl(0, 0%, 95%);
+    --col-track:    hsl(331, 100%, 50%);
 
     --col-exceed:   var(--col-akzent2);
     --col-terra:    hsl(190, 71%, 74%);

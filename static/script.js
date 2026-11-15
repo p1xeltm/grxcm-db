@@ -54,8 +54,12 @@ function zeigeTrackAufKarte(activityId) {
 
         if (!Array.isArray(rawTrack) || rawTrack.length === 0) return;
 
+        // CSS-Variable --col-track direkt aus der style.css auslesen
+        const computedStyle = getComputedStyle(document.documentElement);
+        const trackFarbe = computedStyle.getPropertyValue('--col-track').trim();
+
         aktuellerTrackLayer = L.polyline(rawTrack, {
-            color: 'hsl(331, 100%, 50%)',
+            color: trackFarbe,
             weight: 3,
             opacity: 0.85,
             smoothFactor: 1
@@ -63,9 +67,7 @@ function zeigeTrackAufKarte(activityId) {
 
         map.fitBounds(aktuellerTrackLayer.getBounds(), { padding: [20, 20] });
 
-    } catch (e) {
-        console.error('Fehler beim Parsen/Zeichnen des Tracks:', e);
-    }
+    } catch (e) { }
 }
 
 function zeigeHoehenprofil(activityId) {
@@ -109,9 +111,8 @@ function zeigeHoehenprofil(activityId) {
         const yMax = Math.ceil(zielMax / 50) * 50;
         const yMin = Math.floor(gepuffertMin / 50) * 50;
 
-        // Liest die echte Farbe aus deiner style.css aus (mit Fallback, falls mal was klemmt)
         const computedStyle = getComputedStyle(document.documentElement);
-        const akzentFarbe = computedStyle.getPropertyValue('--col-akzent1').trim() || 'hsl(180, 90%, 20%)';
+        const akzentFarbe = computedStyle.getPropertyValue('--col-akzent1').trim();
 
         if (meinHoehenChart) {
             meinHoehenChart.destroy();
