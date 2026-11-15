@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -56,7 +57,9 @@
 
             <div class="container-rechts">
                 <div id="osmkarte" class="container-osmkarte"></div>
-                <div id="hoehenprofil" class="container-hoehenprofil"><span>Höhenprofil</span></div>
+                <div id="hoehenprofil" class="container-hoehenprofil">
+                    <canvas id="hoehenprofilChart"></canvas>
+                </div>
             </div>
 
         </div>

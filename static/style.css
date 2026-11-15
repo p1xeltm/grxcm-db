@@ -92,12 +92,19 @@ body {
 .container-hoehenprofil {
     width: 100%;
     flex: 1;
-    background-color: hsl(190, 24%, 87%);
+    background-color: var(--col-tabelle);
     display: flex;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
     overflow: hidden;
+    position: relative;
+    padding: 5px;
+}
+
+.container-hoehenprofil canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 

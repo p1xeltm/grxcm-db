@@ -103,7 +103,6 @@ def gpxexport(activity_id):
         fit = FitFile(str(fit_pfad))
         SEMICIRCLE_FACTOR = 180.0 / (2**31)
 
-        # GPX XML-Struktur aufbauen
         gpx = ET.Element("gpx", {
             "version": "1.1",
             "creator": "grxcm-db",
@@ -122,13 +121,11 @@ def gpxexport(activity_id):
                 
                 trkpt = ET.SubElement(trkseg, "trkpt", {"lat": lat_deg, "lon": lon_deg})
                 
-                # Höhe (falls vorhanden)
                 ele = record.get_value("enhanced_altitude") or record.get_value("altitude")
                 if ele is not None:
                     ele_el = ET.SubElement(trkpt, "ele")
                     ele_el.text = str(round(float(ele), 1))
                     
-                # Zeitstempel (falls vorhanden)
                 time_val = record.get_value("timestamp")
                 if time_val is not None:
                     time_el = ET.SubElement(trkpt, "time")

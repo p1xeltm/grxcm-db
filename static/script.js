@@ -4,6 +4,7 @@ let map = null;
 let aktuellerTrackLayer = null;
 let aktiveActivityId = null;
 let alterZellenWert = '';
+let meinHoehenChart = null;
 
 
 /*
@@ -65,6 +66,115 @@ function zeigeTrackAufKarte(activityId) {
     } catch (e) {
         console.error('Fehler beim Parsen/Zeichnen des Tracks:', e);
     }
+}
+
+function zeigeHoehenprofil(activityId) {
+    const aktivitaet = alleAktivitaeten.find(a => a.id === activityId);
+    const canvasElement = document.getElementById('hoehenprofilChart');
+    if (!canvasElement) return;
+    const ctx = canvasElement.getContext('2d');
+
+    if (!aktivitaet || !aktivitaet.track) {
+        if (meinHoehenChart) {
+            meinHoehenChart.destroy();
+            meinHoehenChart = null;
+        }
+        return;
+    }
+
+    try {
+        const rawTrack = typeof aktivitaet.track === 'string' 
+            ? JSON.parse(aktivitaet.track) 
+            : aktivitaet.track;
+
+        if (!Array.isArray(rawTrack) || rawTrack.length === 0) return;
+
+        const gesamtDistanz = Number(aktivitaet.distanz) || 0;
+        const anzahlPunkte = rawTrack.length;
+
+        const datenPunkte = rawTrack.map((punkt, index) => {
+            const aktuelleDistanz = anzahlPunkte > 1 ? (index / (anzahlPunkte - 1)) * gesamtDistanz : 0;
+            return {
+                x: Number(aktuelleDistanz.toFixed(2)),
+                y: punkt.length > 2 ? punkt[2] : 0
+            };
+        });
+
+        const maxHoehe = datenPunkte.reduce((max, p) => Math.max(max, p.y), 0);
+        const minHoehe = datenPunkte.reduce((min, p) => Math.min(min, p.y), maxHoehe);
+
+        const zielMax = maxHoehe + 50;
+        const gepuffertMin = minHoehe > 0 ? minHoehe * 0.9 : 0;
+
+        const yMax = Math.ceil(zielMax / 50) * 50;
+        const yMin = Math.floor(gepuffertMin / 50) * 50;
+
+        // Liest die echte Farbe aus deiner style.css aus (mit Fallback, falls mal was klemmt)
+        const computedStyle = getComputedStyle(document.documentElement);
+        const akzentFarbe = computedStyle.getPropertyValue('--col-akzent1').trim() || 'hsl(180, 90%, 20%)';
+
+        if (meinHoehenChart) {
+            meinHoehenChart.destroy();
+        }
+
+        meinHoehenChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    data: datenPunkte,
+                    borderColor: akzentFarbe,
+                    backgroundColor: `color-mix(in srgb, ${akzentFarbe} 20%, transparent)`,
+                    borderWidth: 2,
+                    fill: true,
+                    pointRadius: 0,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        min: 0,
+                        max: gesamtDistanz,
+                        ticks: {
+                            callback: function(value) {
+                                if (value % 10 === 0) {
+                                    return value + ' km';
+                                }
+                                return '';
+                            },
+                            font: { size: 10 }
+                        },
+                        afterBuildTicks: function(scale) {
+                            const maxVal = scale.max;
+                            const ticks = [];
+                            for (let i = 0; i <= maxVal; i += 5) {
+                                ticks.push({ value: i });
+                            }
+                            scale.ticks = ticks;
+                        },
+                        grid: { color: 'rgba(0,0,0,0.05)' }
+                    },
+                    y: { 
+                        display: true,
+                        min: yMin, 
+                        max: yMax, 
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { 
+                            stepSize: 50, 
+                            font: { size: 10 } 
+                        }
+                    }
+                }
+            }
+        });
+
+    } catch (e) { }
 }
 
 // Funktion: Umwandlung Datum YYYY-MM-DD >> MON dd
@@ -178,6 +288,10 @@ function resetAuswahl() {
     if (aktuellerTrackLayer && map) {
         map.removeLayer(aktuellerTrackLayer);
         aktuellerTrackLayer = null;
+    }
+    if (meinHoehenChart) {
+        meinHoehenChart.destroy();
+        meinHoehenChart = null;
     }
 }
 
@@ -441,6 +555,7 @@ function initListenerTabellenKlick() {
                 }
 
                 zeigeTrackAufKarte(aktiveActivityId);
+                zeigeHoehenprofil(aktiveActivityId);
             }
         }
     });

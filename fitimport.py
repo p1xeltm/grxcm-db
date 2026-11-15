@@ -60,11 +60,14 @@ def extract_gps_track(fit):
     for record in fit.get_messages("record"):
         lat = record.get_value("position_lat")
         lon = record.get_value("position_long")
+        ele = record.get_value("enhanced_altitude") or record.get_value("altitude")
 
         if lat is not None and lon is not None:
             lat_deg = round(lat * SEMICIRCLE_FACTOR, 6)
             lon_deg = round(lon * SEMICIRCLE_FACTOR, 6)
-            raw_points.append([lat_deg, lon_deg])
+            ele_val = round(float(ele), 1) if ele is not None else 0.0
+            
+            raw_points.append([lat_deg, lon_deg, ele_val])
 
     if raw_points:
         simplified = douglas_peucker(raw_points, EPSILON)
