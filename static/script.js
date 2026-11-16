@@ -37,6 +37,50 @@ function initKarte() {
         className: 'hillshade-layer',
         attribution: 'Esri, USGS, NOAA'
     }).addTo(map);
+
+    // Button zum Maximieren/Minimieren oben rechts auf der Karte hinzufügen
+    const maximizeControl = L.control({ position: 'topright' });
+    maximizeControl.onAdd = function () {
+        const btn = L.DomUtil.create('div', 'leaflet-control-maximize');
+        btn.id = 'button-karte-maximieren';
+        btn.innerHTML = '⛶';
+        btn.title = 'Karte vergrößern';
+
+        L.DomEvent.disableClickPropagation(btn);
+        btn.onclick = () => toggleKarteMaximieren();
+
+        return btn;
+    };
+    maximizeControl.addTo(map);
+}
+
+// Funktion: Umschalten zwischen Container-Größe und maximierter Karte
+function toggleKarteMaximieren(erzwingeSchliessen = false) {
+    if (!map) return;
+    const mapContainer = map.getContainer();
+    const btn = document.getElementById('button-karte-maximieren');
+
+    const istAktuellMaximiert = mapContainer.classList.contains('karte-maximiert');
+    if (erzwingeSchliessen && !istAktuellMaximiert) return;
+
+    const istJetztMaximiert = erzwingeSchliessen
+        ? false
+        : mapContainer.classList.toggle('karte-maximiert');
+
+    if (erzwingeSchliessen) {
+        mapContainer.classList.remove('karte-maximiert');
+    }
+
+    if (btn) {
+        btn.innerHTML = istJetztMaximiert ? '⛶' : '⛶';
+        btn.title = istJetztMaximiert ? 'Karte verkleinern' : 'Karte vergrößern';
+    }
+
+    map.invalidateSize();
+
+    if (aktuellerTrackLayer) {
+        map.fitBounds(aktuellerTrackLayer.getBounds(), { padding: [20, 20] });
+    }
 }
 
 // Funktion: Zeichnen des Tracks auf OSM-Karte
@@ -497,7 +541,15 @@ function initListenerTastatur() {
         const istEdit = el.classList?.contains('edit-zelle');
 
         if (e.key === 'Escape') {
-            // Prüfung, ob Lösch-Bestätigungsmodus aktiv ist
+            // 1. Prüfung, ob Karte maximiert ist -> wieder verkleinern
+            const mapContainer = document.getElementById('osmkarte');
+            if (mapContainer && mapContainer.classList.contains('karte-maximiert')) {
+                e.preventDefault();
+                toggleKarteMaximieren(true);
+                return;
+            }
+
+            // 2. Prüfung, ob Lösch-Bestätigungsmodus aktiv ist
             const loeschBtn = document.getElementById('button-loeschen');
             if (loeschBtn && loeschBtn.classList.contains('bestaetigung')) {
                 e.preventDefault();
@@ -509,7 +561,8 @@ function initListenerTastatur() {
                 }
                 return;
             }
-            // Esc für Suchfeld und Editiermodus
+
+            // 3. Esc für Suchfeld und Editiermodus
             if (!istSuche && !istEdit) return;
             AbbruchEsc(el, istSuche ? '' : alterZellenWert);
 
