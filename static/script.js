@@ -5,6 +5,8 @@ let aktuellerTrackLayer = null;
 let aktiveActivityId = null;
 let alterZellenWert = '';
 let meinHoehenChart = null;
+let aktuellerHoverMarker = null;
+let aktuellerRawTrack = null;
 
 
 /*
@@ -70,6 +72,7 @@ function zeigeTrackAufKarte(activityId) {
     } catch (e) { }
 }
 
+// Funktion: Zeichnen des Höhenprofils inklusive Hover-Verbindung zur Karte
 function zeigeHoehenprofil(activityId) {
     const aktivitaet = alleAktivitaeten.find(a => a.id === activityId);
     const canvasElement = document.getElementById('hoehenprofilChart');
@@ -81,6 +84,7 @@ function zeigeHoehenprofil(activityId) {
             meinHoehenChart.destroy();
             meinHoehenChart = null;
         }
+        aktuellerRawTrack = null;
         return;
     }
 
@@ -90,6 +94,8 @@ function zeigeHoehenprofil(activityId) {
             : aktivitaet.track;
 
         if (!Array.isArray(rawTrack) || rawTrack.length === 0) return;
+        
+        aktuellerRawTrack = rawTrack;
 
         const gesamtDistanz = Number(aktivitaet.distanz) || 0;
         const anzahlPunkte = rawTrack.length;
@@ -113,6 +119,7 @@ function zeigeHoehenprofil(activityId) {
 
         const computedStyle = getComputedStyle(document.documentElement);
         const akzentFarbe = computedStyle.getPropertyValue('--col-akzent1').trim();
+        const trackFarbe = computedStyle.getPropertyValue('--col-track').trim();
 
         if (meinHoehenChart) {
             meinHoehenChart.destroy();
@@ -134,7 +141,37 @@ function zeigeHoehenprofil(activityId) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {mode: 'nearest', intersect: false, axis: 'x'},
                 plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                
+                onHover: (event, activeElements) => {
+                    if (!map || !aktuellerRawTrack) return;
+
+                    if (activeElements.length > 0) {
+                        const index = activeElements[0].index;
+                        const punkt = aktuellerRawTrack[index];
+                        if (punkt) {
+                            const latLng = [punkt[0], punkt[1]];
+
+                            if (!aktuellerHoverMarker) {
+                                aktuellerHoverMarker = L.circleMarker(latLng, {
+                                    radius: 6,
+                                    color: 'white',
+                                    fillColor: trackFarbe,
+                                    fillOpacity: 1,
+                                    weight: 2
+                                }).addTo(map);
+                            } else {
+                                aktuellerHoverMarker.setLatLng(latLng);
+                            }
+                        }
+                    } else {
+                        if (aktuellerHoverMarker) {
+                            map.removeLayer(aktuellerHoverMarker);
+                            aktuellerHoverMarker = null;
+                        }
+                    }
+                },
 
                 scales: {
                     x: {
@@ -144,9 +181,7 @@ function zeigeHoehenprofil(activityId) {
                         max: gesamtDistanz,
                         ticks: {
                             callback: function(value) {
-                                if (value % 10 === 0) {
-                                    return value + ' km';
-                                }
+                                if (value % 10 === 0) return value + ' km';
                                 return '';
                             },
                             font: { size: 10 }
@@ -166,13 +201,32 @@ function zeigeHoehenprofil(activityId) {
                         min: yMin, 
                         max: yMax, 
                         grid: { color: 'rgba(0,0,0,0.05)' },
-                        ticks: { 
-                            stepSize: 50, 
-                            font: { size: 10 } 
-                        }
+                        ticks: { stepSize: 50, font: { size: 10 } }
                     }
                 }
-            }
+            },
+            // --- HIER WURDE DAS PLUGIN EINGEFÜGT ---
+            plugins: [{
+                id: 'verticalLine',
+                afterDraw: (chart) => {
+                    const activeElements = chart.getActiveElements();
+                    if (activeElements.length > 0) {
+                        const ctx = chart.ctx;
+                        const x = activeElements[0].element.x;
+                        const topY = chart.scales.y.top;
+                        const bottomY = chart.scales.y.bottom;
+
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)'; // Korrigierte Klammer
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            }]
         });
 
     } catch (e) { }
@@ -290,6 +344,11 @@ function resetAuswahl() {
         map.removeLayer(aktuellerTrackLayer);
         aktuellerTrackLayer = null;
     }
+    if (aktuellerHoverMarker && map) {
+        map.removeLayer(aktuellerHoverMarker);
+        aktuellerHoverMarker = null;
+    }
+    aktuellerRawTrack = null;
     if (meinHoehenChart) {
         meinHoehenChart.destroy();
         meinHoehenChart = null;
